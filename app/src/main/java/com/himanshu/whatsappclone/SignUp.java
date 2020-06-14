@@ -103,7 +103,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
             case R.id.btnSignUpLogIn:
 
-                Intent intent = new Intent(SignUp.this , WhatsAppUser.class);
+                Intent intent = new Intent(SignUp.this , LogIn.class);
                 startActivity(intent);
                 finish();
 
