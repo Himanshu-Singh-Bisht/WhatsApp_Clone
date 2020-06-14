@@ -2,6 +2,7 @@ package com.himanshu.whatsappclone;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class WhatsAppUser extends AppCompatActivity {
 
@@ -31,6 +33,8 @@ public class WhatsAppUser extends AppCompatActivity {
         final ArrayList<String> waUsers = new ArrayList<>();
 
         final ArrayAdapter adapter = new ArrayAdapter(WhatsAppUser.this, android.R.layout.simple_list_item_1 , waUsers);      // storing item of list in the adapter.
+
+        final SwipeRefreshLayout mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
         // to get data from parse server
         try {
@@ -56,6 +60,54 @@ public class WhatsAppUser extends AppCompatActivity {
         {
             e.printStackTrace();
         }
+
+        // to get new users (if present) on swipe to refresh
+        mySwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                try {
+
+                    ParseQuery<ParseUser> parseQuery = ParseUser.getQuery();
+                    parseQuery.whereNotEqualTo("username" , ParseUser.getCurrentUser().getUsername());  // as we don't want current user.
+                    parseQuery.whereNotContainedIn("username" , waUsers);       // as we also don't want those users which are already present in arrayList waUsers
+
+                    parseQuery.findInBackground(new FindCallback<ParseUser>() {
+                        @Override
+                        public void done(List<ParseUser> objects, ParseException e) {
+                            if(objects.size() > 0)  // new users are present
+                            {
+                                if(e == null)
+                                {
+                                    for(ParseUser user : objects)
+                                    {
+                                        waUsers.add(user.getUsername());
+                                    }
+
+                                    adapter.notifyDataSetChanged();     // to notify the listView that dataset is changed
+
+                                    if(mySwipeRefreshLayout.isRefreshing())     // as after getting new user we need to stop the refreshing.
+                                    {
+                                        mySwipeRefreshLayout.setRefreshing(false);
+                                    }
+                                }
+                            }
+                            else    // when no new user is present
+                            {
+                                if(mySwipeRefreshLayout.isRefreshing())
+                                {
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                }
+                            }
+                        }
+                    });
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
