@@ -47,6 +47,13 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
                 return false;
             }
         });
+
+        if(ParseUser.getCurrentUser() != null)
+        {
+            Intent intent = new Intent(LogIn.this ,WhatsAppUser.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     @Override

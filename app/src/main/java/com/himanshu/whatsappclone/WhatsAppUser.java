@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -22,15 +24,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class WhatsAppUser extends AppCompatActivity {
+public class WhatsAppUser extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
+    ArrayList<String> waUsers;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_whats_app_user);
 
         final ListView listView = findViewById(R.id.listView);
-        final ArrayList<String> waUsers = new ArrayList<>();
+        listView.setOnItemClickListener(this);
+
+        waUsers = new ArrayList<>();
 
         final ArrayAdapter adapter = new ArrayAdapter(WhatsAppUser.this, android.R.layout.simple_list_item_1 , waUsers);      // storing item of list in the adapter.
 
@@ -142,5 +147,14 @@ public class WhatsAppUser extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    // to click on item of listView and start chatting.
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent intent = new Intent(WhatsAppUser.this , WhatsAppChatActivity.class);
+        intent.putExtra("selectedUser" , waUsers.get(position));
+        startActivity(intent);
     }
 }
